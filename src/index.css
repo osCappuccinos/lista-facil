@@ -31,7 +31,7 @@ body {
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 24px;
   line-height: 1.1;
 }
 
@@ -65,4 +65,44 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.btn-register {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-color: #BF360C;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: Calibri, inherit;
+  color: white;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  width: 18rem;
+  margin-top: 1rem;
+  font-size: 14px;
+}
+
+.btn-guest {
+  margin-top: 1rem;
+  border: 1px solid #BF360C;
+  color: #BF360C;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  width: 18rem;
+  font-size: 1.0em;
+  background-color: white;
+  font-size: 14px;
+}
+
+
+.register-text {
+  margin-top: 1rem;
+  font-size: 14px;
+  color: #4B5563;  /* gray-600 equivalent */
+}
+
+.register-link {
+  color: #BF360C;
+  font-weight: bold;
 }

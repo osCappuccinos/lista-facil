@@ -20,19 +20,19 @@ const WelcomePage = () => {
                 <span className="text-gray-400">🖼️</span>
             </div>
             <button
-                className="mt-6 bg-red-700 text-white py-2 px-6 rounded-lg shadow-md w-72 text-lg"
-                onClick={() => navigate("/login")}
-            >
-                FAZER LOGIN
-            </button>
-            <button
-                className="mt-4 border border-red-700 text-red-700 py-2 px-6 rounded-lg w-72 text-lg"
-                onClick={handleGuestLogin}
-            >
-                ENTRAR COMO CONVIDADO
-            </button>
-            <p className="mt-4 text-gray-600">
-                NÃO POSSUI UMA CONTA? <Link to="/register" className="text-red-700 font-bold">CRIE UMA AQUI</Link>
+    className="btn-register"
+    onClick={() => navigate("/login")}
+>
+    FAZER LOGIN
+        </button>
+        <button
+            className="btn-guest"
+            onClick={handleGuestLogin}
+        >
+            ENTRAR COMO CONVIDADO
+        </button>
+             <p className="register-text">
+                NÃO POSSUI UMA CONTA? <Link to="/register" className="register-link">CRIE UMA AQUI</Link>
             </p>
         </div>
     );
