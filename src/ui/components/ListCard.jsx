@@ -13,7 +13,7 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
 
   return (
     <div 
-      className="bg-white shadow-lg rounded-lg p-4 cursor-pointer hover:shadow-xl transition-shadow" 
+      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition-shadow" 
       onClick={() => navigate(`/list/${id}`)}
     >
       {isEditing ? (
@@ -24,7 +24,9 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
             onChange={(e) => setNewTitle(e.target.value)}
             className="w-full p-2 border rounded mt-1"
           />
-          <button onClick={handleEdit} className="bg-green-500 text-white p-2 rounded mt-2">Save</button>
+          <button onClick={handleEdit} className="bg-green-500 text-white px-3 py-1 rounded text-xs mt-2">
+            Save
+          </button>
         </div>
       ) : (
         <h2 className="text-gray-800 font-bold text-lg">{titulo}</h2>
@@ -37,8 +39,18 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
       </ul>
       <p className="text-gray-700 font-bold mt-3">TOTAL: R$ {total.toFixed(2)}</p>
       <div className="flex justify-between mt-4">
-        <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="bg-blue-500 text-white p-2 rounded">Edit</button>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(id); }} className="bg-red-500 text-white p-2 rounded">Delete</button>
+      <button 
+  onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} 
+  className="bg-blue-500 text-gray px-2 py-0.5 rounded-sm text-[10px] hover:bg-blue-600 min-w-[60px]"
+>
+  Edit
+</button>
+<button 
+  onClick={(e) => { e.stopPropagation(); onDelete(id); }} 
+  className="bg-red-500 text-gray px-2 py-0.5 rounded-sm text-[10px] hover:bg-red-600 min-w-[60px]"
+>
+  Delete
+</button>
       </div>
     </div>
   );
