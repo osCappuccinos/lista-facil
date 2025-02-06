@@ -13,7 +13,7 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-xl transition-shadow" 
+      className="bg-white w-full min-h-40 drop-shadow-lg rounded-lg p-4 cursor-pointer hover:shadow-xl transition-shadow" 
       onClick={() => navigate(`/list/${id}`)}
     >
       {isEditing ? (
@@ -31,27 +31,15 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
       ) : (
         <h2 className="text-gray-800 font-bold text-lg">{titulo}</h2>
       )}
+      {/* Descrição dos itens */}
       <ul className="text-gray-600 text-sm mt-2">
         {itens.slice(0, 3).map((item, index) => (
           <li key={index}>{item.quantidade}x {item.nome}</li>
         ))}
         {itens.length > 3 && <li className="text-gray-500">...</li>}
       </ul>
-      <p className="text-gray-700 font-bold mt-3">TOTAL: R$ {total.toFixed(2)}</p>
-      <div className="flex justify-between mt-4">
-      <button 
-  onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} 
-  className="bg-blue-500 text-gray px-2 py-0.5 rounded-sm text-[10px] hover:bg-blue-600 min-w-[60px]"
->
-  Edit
-</button>
-<button 
-  onClick={(e) => { e.stopPropagation(); onDelete(id); }} 
-  className="bg-red-500 text-gray px-2 py-0.5 rounded-sm text-[10px] hover:bg-red-600 min-w-[60px]"
->
-  Delete
-</button>
-      </div>
+      {/* Total */}
+      <p className="text-gray-700 font-bold mt-3 fixed bottom-3 right-4 text-[15px]">TOTAL: R$ {total.toFixed(2)}</p>
     </div>
   );
 };

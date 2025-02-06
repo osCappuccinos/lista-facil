@@ -3,6 +3,7 @@ import { auth, db } from "../../../firebase";
 import { collection, query, where, getDocs, doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import ListaCard from "../components/ListCard";
+import { List, PencilLine, CircleUser } from "lucide-react";
 
 const Home = () => {
   const [listas, setListas] = useState([]);
@@ -69,9 +70,9 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
+    <div className="min-h-screen min-w-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       {/* Cabeçalho fixo - estilo unificado */}
-      <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center z-10">
+      <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center">
         <div className="flex-1">
           <h1 className="text-[24px] font-semibold text-[#656565]">
             Olá, {userName}
@@ -92,7 +93,7 @@ const Home = () => {
         <h2 className="text-lg font-medium text-[#656565] mb-4">Todas as listas</h2>
 
         {/* Grid de Listas */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4 mt-5">
           {listas.length === 0 ? (
             <p className="text-center text-[#656565] mt-6">Nenhuma lista encontrada</p>
           ) : (
@@ -117,22 +118,24 @@ const Home = () => {
           className="flex flex-col items-center text-[#656565] hover:text-[#BF360C] transition-colors"
           onClick={() => navigate("/home")}
         >
-          <span className="text-2xl">📋</span>
+          <List></List>
           <span className="text-xs mt-1">Listas</span>
         </button>
         
         <button
           onClick={() => navigate("/new-list")}
-          className="bg-[#BF360C] text-grey rounded-full p-3 shadow-lg -translate-y-6 hover:bg-red-700 transition-colors"
+          className="bg-[#2e7b32] flex flex-col items-center justify-center grow-0 shrink-0 w-12 h-12 text-grey rounded-full p-3 shadow-lg -translate-y-6 hover:bg-red-700 transition-colors"
         >
-          <span className="text-2xl">+</span>
+          
+        <PencilLine></PencilLine>
         </button>
+
         
         <button 
           className="flex flex-col items-center text-[#656565] hover:text-[#BF360C] transition-colors"
           onClick={() => navigate("/profile")}
         >
-          <span className="text-2xl">👤</span>
+          <CircleUser></CircleUser>
           <span className="text-xs mt-1">Perfil</span>
         </button>
       </div>
