@@ -4,11 +4,13 @@ import { auth, db } from "../../../firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import AddItem from "../components/AddItem";
 import EditItem from "../components/EditItem";
+import { ArrowLeft, Share, Trash2, Plus } from "lucide-react";
 
 const ListPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [titulo, setTitulo] = useState("Nova Lista");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [itens, setItens] = useState([]);
   const [filtro, setFiltro] = useState("todos");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -73,59 +75,81 @@ const ListPage = () => {
     window.open(url, '_blank');
   };
 
+  const salvarTitulo = async () => {
+    if (!id || !auth.currentUser) return;
+
+    const listaRef = doc(db, "listas", id);
+    await setDoc(listaRef, { titulo }, { merge: true });
+
+    setIsEditingTitle(false); // Sai do modo de edição após salvar
+  };
+
   return (
-    <div className="min-h-screen bg-white px-6">
-      {/* Cabeçalho - similar ao estilo da HomePage e LoginPage */}
+    <div className="w-screen h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center z-10">
-        <button 
-          className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none" 
+        <button
+          className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
           onClick={() => navigate(-1)}
         >
-          ←
+          <ArrowLeft color="red" />
         </button>
-        <h1 className="text-[24px] font-semibold text-[#656565]">{titulo}</h1>
+        <h1
+          className="text-[18px] font-semibold text-[#00000088] cursor-pointer pl-5"
+          onClick={() => setIsEditingTitle(true)}
+        >
+          {isEditingTitle ? (
+            <input
+              type="text"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              onBlur={salvarTitulo}
+              onKeyDown={(e) => e.key === "Enter" && salvarTitulo()}
+              autoFocus
+              className="rounded px-2 py-1 w-auto focus:outline-none focus:ring-2 focus:ring-[#2E7D32]"
+            />
+          ) : (
+            titulo
+          )}
+        </h1>
         <div className="flex items-center space-x-4">
-          <button 
-            className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none" 
+          <button
+            className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
             onClick={exportarParaWhatsApp}
           >
-            📤
+            <Share color="#00000088" />
           </button>
-          <button 
-            className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none" 
+          <button
+            className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
             onClick={deleteList}
           >
-            🗑
+            <Trash2 color="#CF1322" />
           </button>
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
       <div className="pt-20">
-      <div className="flex justify-center gap-4 mb-4">
-  <button
-    onClick={() => setFiltro("todos")}
-    className={`mt-4 w-28 py-2 px-6 text-center rounded-lg transition-colors duration-300 text-sm font-medium ${
-      filtro === "todos"
-        ? "bg-[#656565] text-grey"
-        : "border border-[#BF360C] text-[#BF360C] bg-white"
-    }`}
-  >
-    Todos os itens
-  </button>
-  <button
-    onClick={() => setFiltro("comprados")}
-    className={`mt-4 w-28 py-2 px-6 text-center rounded-lg transition-colors duration-300 text-sm font-medium ${
-      filtro === "comprados"
-        ? "bg-[#656565] text-grey"
-        : "border border-[#BF360C] text-[#BF360C] bg-white"
-    }`}
-  >
-    Comprados
-  </button>
-</div>
+        <div className="flex justify-center gap-4 mb-4">
+          <button
+            onClick={() => setFiltro("todos")}
+            className={`mt-4 w-35 py-2 px-6 text-center rounded-4xl transition-colors duration-300 text-[14px] font-medium ${filtro === "todos"
+              ? "bg-[#2E7D32] text-[#FFFFFF]"
+              : "border border-[#2E7D32] text-[#2E7D32] bg-white"
+              }`}
+          >
+            Todos os itens
+          </button>
+          <button
+            onClick={() => setFiltro("comprados")}
+            className={`mt-4 w-35 py-2 px-6 text-center rounded-4xl transition-colors duration-300 text-[14px] font-medium ${filtro === "comprados"
+              ? "bg-[#2E7D32] text-grey"
+              : "border border-[#2E7D32] text-[#2E7D32] bg-white"
+              }`}
+          >
+            Comprados
+          </button>
+        </div>
         {itens.length === 0 ? (
-          <p className="text-center text-gray-500 mt-6">Nenhum item cadastrado</p>
+          <p className="text-center text-[#00000045] mt-6">Nenhum item cadastrado</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {itens.map((item, index) => (
@@ -135,8 +159,8 @@ const ListPage = () => {
               >
                 <span className="text-gray-700">{item.nome}</span>
                 <div className="flex items-center gap-2">
-                  <button 
-                    className="w-8 h-8 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none" 
+                  <button
+                    className="w-8 h-8 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
                     onClick={() => handleEditItem(item)}
                   >
                     ✏️
@@ -157,31 +181,33 @@ const ListPage = () => {
         )}
       </div>
 
-      {/* Cartão de resumo e ações, com estilo similar à HomePage/ LoginPage */}
-      <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-  <div className="bg-white rounded-xl p-4 w-11/12 max-w-md">
-    <div className="flex justify-between text-gray-600 text-sm">
-      <p>Quantidade Total</p>
-      <p>{itens.length.toString().padStart(4, "0")}</p>
-    </div>
-    <div className="flex justify-between font-semibold text-gray-800 text-sm">
-      <p>Valor Total</p>
-      <p>R$ {itens.reduce((sum, item) => sum + (item.preco || 0), 0).toFixed(2)}</p>
-    </div>
-    <button
-      onClick={salvarLista}
-      className="mt-4 border border-[#BF360C] text-[#BF360C] py-2 px-6 rounded-lg w-72 text-[14px] bg-white cursor-pointer transition-colors duration-300"
-    >
-      Salvar Lista
-    </button>
-    <button
-      onClick={() => setIsAddModalOpen(true)}
-      className="mt-4 border border-[#BF360C] text-[#BF360C] py-2 px-6 rounded-lg w-72 text-[14px] bg-white cursor-pointer transition-colors duration-300"
-    >
-      + Adicionar item
-    </button>
-  </div>
-</div>
+      <div className="fixed bottom-4 left-0 right-0 flex justify-center drop-shadow-xl">
+        <div className="bg-white rounded-xl p-4 w-11/12 max-w-md">
+          <div className="flex justify-between text-gray-600 text-sm">
+            <p>Quantidade Total</p>
+            <p>{itens.length.toString().padStart(4, "0")}</p>
+          </div>
+          <div className="flex justify-between font-semibold text-gray-800 text-sm">
+            <p>Valor Total</p>
+            <p>R$ {itens.reduce((sum, item) => sum + (item.preco || 0), 0).toFixed(2)}</p>
+          </div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="mt-4 bg-[#FBE9E7] text-[#BF360C] py-2 px-6 rounded-lg w-full text-[14px cursor-pointer transition-colors duration-300"
+          >
+            <div class="flex justify-center items-center gap-1 font-semibold" >
+              <Plus />
+              Adicionar item
+            </div>
+          </button>
+          <button
+            onClick={salvarLista}
+            className="mt-4 border border-[#BF360C] text-[#BF360C] py-2 px-6 rounded-lg w-full text-[14px] bg-white cursor-pointer transition-colors duration-300"
+          >
+            Salvar Lista
+          </button>
+        </div>
+      </div>
 
       {isAddModalOpen && (
         <AddItem
