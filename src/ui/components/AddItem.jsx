@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 
-const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
+const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid }) => {
   const [categoria, setCategoria] = useState("");
   const [item, setItem] = useState("");
   const [valorUnitario, setValorUnitario] = useState(0);
@@ -10,6 +10,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
   const [categorias, setCategorias] = useState([]);
   const [itensSugeridos, setItensSugeridos] = useState([]);
   const [valorTotal, setValorTotal] = useState(0);
+  const [editando, setEditando] = useState(false);
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -34,10 +35,34 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
     }
   }, [categoria, categorias]);
 
-  // Atualiza o valor total quando a quantidade ou o valor unitário mudam
   useEffect(() => {
     setValorTotal(quantidade * valorUnitario);
   }, [quantidade, valorUnitario]);
+
+  useEffect(() => {
+    const buscarItem = async () => {
+      if (itemUid && listId) {
+        const listaRef = doc(db, "listas", listId);
+        const listaSnap = await getDoc(listaRef);
+
+        if (listaSnap.exists()) {
+          const itens = listaSnap.data().itens || [];
+          const itemEncontrado = itens.find((it) => it.uid === itemUid);
+
+          if (itemEncontrado) {
+            setItem(itemEncontrado.nome);
+            setValorUnitario(itemEncontrado.preco);
+            setQuantidade(itemEncontrado.quantidade);
+            setEditando(true);
+          }
+        }
+      }
+    };
+
+    if (isOpen) {
+      buscarItem();
+    }
+  }, [isOpen, itemUid, listId]);
 
   const adicionarItem = async () => {
     if (!item.trim() || isNaN(parseFloat(valorUnitario)) || quantidade <= 0) return;
@@ -45,29 +70,29 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const novoItem = {
-      nome: item,
-      preco: parseFloat(valorUnitario),
-      quantidade,
-      comprado: false,
-    };
+    let listaRef = doc(db, "listas", listId);
+    const listaSnap = await getDoc(listaRef);
 
-    let listaRef;
-    let listaExistente = listId;
+    if (editando) {
+      if (listaSnap.exists()) {
+        const itens = listaSnap.data().itens || [];
+        const novoItens = itens.map((it) =>
+          it.uid === itemUid
+            ? { ...it, nome: item, preco: parseFloat(valorUnitario), quantidade }
+            : it
+        );
 
-    if (!listId) {
-      listaExistente = `${user.uid}-${Date.now()}`;
-      setListId(listaExistente);
-      listaRef = doc(db, "listas", listaExistente);
-      await setDoc(listaRef, {
-        uid: user.uid,
-        titulo: "Nova Lista",
-        itens: [novoItem],
-        total: parseFloat(valorUnitario) * quantidade,
-      });
+        await updateDoc(listaRef, { itens: novoItens });
+        setItens(novoItens);
+      }
     } else {
-      listaRef = doc(db, "listas", listId);
-      const listaSnap = await getDoc(listaRef);
+      const novoItem = {
+        uid: crypto.randomUUID(),
+        nome: item,
+        preco: parseFloat(valorUnitario),
+        quantidade,
+        comprado: false,
+      };
 
       if (listaSnap.exists()) {
         await updateDoc(listaRef, {
@@ -82,12 +107,14 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
           total: parseFloat(valorUnitario) * quantidade,
         });
       }
+
+      setItens((prevItens) => [...prevItens, novoItem]);
     }
 
-    setItens((prevItens) => [...prevItens, novoItem]);
     setItem("");
     setValorUnitario(0);
-    setQuantidade(0);
+    setQuantidade(1);
+    setEditando(false);
     onClose();
   };
 
@@ -136,7 +163,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
         <label className="block text-sm text-gray-600 mt-4">Valor unitário</label>
         <input
           type="number"
-          step="0.01"
+          step="0.1"
           className="w-full p-2 border rounded mt-1 bg-white text-gray-600"
           value={valorUnitario}
           onChange={(e) => setValorUnitario(parseFloat(e.target.value))}
@@ -146,7 +173,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
         <div className="flex items-center justify-between mt-4">
           <label className="block text-sm text-gray-600">Quantidade</label>
           <div className="flex items-center mt-1 bg-[#FBE9E7] h-7 w-21 rounded-md">
-            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(Math.max(0, quantidade - 1))}>-</button>
+            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(Math.max(1, quantidade - 1))}>-</button>
             <span className="px-4 text-black">{quantidade}</span>
             <button className="p-2 text-gray rounded" onClick={() => setQuantidade(quantidade + 1)}>+</button>
           </div>
@@ -156,7 +183,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
           className="w-full mt-6 bg-[#BF360C] text-gray p-3 rounded-md text-white font-semibold"
           onClick={adicionarItem}
         >
-          Adicionar
+          {editando ? "Salvar Alterações" : "Adicionar"}
         </button>
 
         <hr className="my-4" />
