@@ -81,7 +81,22 @@ const ListPage = () => {
     const listaRef = doc(db, "listas", id);
     await setDoc(listaRef, { titulo }, { merge: true });
 
-    setIsEditingTitle(false); // Sai do modo de edição após salvar
+    setIsEditingTitle(false);
+  };
+
+  const itensFiltrados = filtro === "comprados" 
+  ? itens.filter(item => item.comprado) 
+  : itens;
+
+  const toggleComprado = async (index) => {
+    const novosItens = [...itens];
+    novosItens[index].comprado = !novosItens[index].comprado;
+    setItens(novosItens);
+  
+    if (id) {
+      const listaRef = doc(db, "listas", id);
+      await setDoc(listaRef, { itens: novosItens }, { merge: true });
+    }
   };
 
   return (
@@ -148,28 +163,23 @@ const ListPage = () => {
             Comprados
           </button>
         </div>
-        {itens.length === 0 ? (
-          <p className="text-center text-[#00000045] mt-6">Nenhum item cadastrado</p>
+        {itensFiltrados.length === 0 ? (
+          <p className="text-center text-[#00000045] mt-6">
+            {filtro === "comprados" ? "Nenhum item comprado" : "Nenhum item cadastrado"}
+          </p>
         ) : (
           <ul className="mt-4 space-y-2">
-            {itens.map((item, index) => (
+             {itensFiltrados.map((item, index) => (
               <li
                 key={index}
                 className="p-2 border border-[#CFD8DC] rounded-md flex items-center gap-3"
                 onDoubleClick={() => handleEditItem(item)}
               >
                 <button
-                  onClick={async () => {
-                    const novosItens = [...itens];
-                    novosItens[index].comprado = !novosItens[index].comprado;
-                    setItens(novosItens);
-                    const listaRef = doc(db, "listas", id);
-                    await setDoc(listaRef, { itens: novosItens }, { merge: true });
-                  }}
-                  className={`w-5 h-5 flex items-center justify-center border-2 rounded-md transition-all duration-200 ${item.comprado
-                      ? "bg-[#66BB6A] border-[#66BB6A]"
-                      : "bg-white border-gray-300"
-                    }`}
+                  onClick={() => toggleComprado(index)}
+                  className={`w-5 h-5 flex items-center justify-center border-2 rounded-md transition-all duration-200 ${
+                    item.comprado ? "bg-[#66BB6A] border-[#66BB6A]" : "bg-white border-gray-300"
+                  }`}
                 >
                   {item.comprado && <Check className="w-5 h-5 text-white" />}
                 </button>
