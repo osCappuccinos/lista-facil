@@ -31,14 +31,12 @@ const ListaCard = ({ id, titulo, itens, total, onEdit, onDelete }) => {
       ) : (
         <h2 className="text-gray-800 font-bold text-lg">{titulo}</h2>
       )}
-      {/* Descrição dos itens */}
       <ul className="text-gray-600 text-sm mt-2">
         {itens.slice(0, 3).map((item, index) => (
           <li key={index}>{item.quantidade}x {item.nome}</li>
         ))}
         {itens.length > 3 && <li className="text-gray-500">...</li>}
       </ul>
-      {/* Total */}
       <p className="text-gray-700 font-bold mt-3 fixed bottom-3 right-4 text-[15px]">TOTAL: R$ {total.toFixed(2)}</p>
     </div>
   );

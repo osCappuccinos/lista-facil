@@ -15,12 +15,12 @@ const WelcomePage = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="flex flex-col items-center justify-center min-h-screen min-w-screen bg-white">
             <div className="w-40 h-40 border border-gray-400 flex items-center justify-center">
                 <span className="text-gray-400">🖼️</span>
             </div>
             <button
-    className="btn-register"
+    className="btn-register shadow-md"
     onClick={() => navigate("/login")}
 >
     FAZER LOGIN
@@ -31,8 +31,8 @@ const WelcomePage = () => {
         >
             ENTRAR COMO CONVIDADO
         </button>
-             <p className="register-text">
-                NÃO POSSUI UMA CONTA? <Link to="/register" className="register-link">CRIE UMA AQUI</Link>
+             <p className="register-text text-[12px]">
+                NÃO POSSUI UMA CONTA? <Link to="/register" className="register-link text-[12px]">CRIE UMA AQUI</Link>
             </p>
         </div>
     );

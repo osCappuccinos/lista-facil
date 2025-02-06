@@ -60,7 +60,6 @@ const Home = () => {
       alert("Nenhuma lista para exportar.");
       return;
     }
-    // For example, export the first list in the array
     const { titulo, itens } = listas[0];
     const listaTexto = itens.map(item =>
       `Nome: ${item.nome}, Categoria: ${item.categoria}, Preço: ${item.preco}, Quantidade: ${item.quantidade}`
@@ -71,7 +70,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen min-w-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
-      {/* Cabeçalho fixo - estilo unificado */}
       <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center">
         <div className="flex-1">
           <h1 className="text-[24px] font-semibold text-[#656565]">
@@ -88,11 +86,9 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
       <div className="pt-20">
         <h2 className="text-lg font-medium text-[#656565] mb-4">Todas as listas</h2>
 
-        {/* Grid de Listas */}
         <div className="grid grid-cols-2 gap-4 mt-5">
           {listas.length === 0 ? (
             <p className="text-center text-[#656565] mt-6">Nenhuma lista encontrada</p>
@@ -112,7 +108,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Barra de Navegação Inferior - estilo unificado */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#CFD8DC] flex justify-around items-center h-16">
         <button 
           className="flex flex-col items-center text-[#656565] hover:text-[#BF360C] transition-colors"

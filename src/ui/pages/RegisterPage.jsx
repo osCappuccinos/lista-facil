@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth, db } from '../../../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
+import { ArrowLeft } from "lucide-react";
 
 const RegisterPage = () => {
   const [nome, setNome] = useState('');
@@ -84,18 +85,13 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
-      {/* Cabeçalho fixo */}
+    <div className="min-h-screen min-w-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center z-10">
-        <button 
-          className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none" 
-          onClick={() => navigate(-1)}
-        >
-          ←
-        </button>
+      <div className="absolute top-5 left-6 cursor-pointer" onClick={() => navigate(-1)}>
+        <ArrowLeft size={24} className="text-red-700" />
+      </div>
       </header>
 
-      {/* Conteúdo principal */}
       <div className="pt-20 flex flex-col items-center">
         <h1 className="text-[24px] font-semibold text-[#656565] mb-6">Crie sua conta</h1>
 
@@ -163,7 +159,7 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full mt-6 py-3 rounded-lg text-sm font-medium border border-[#BF360C] text-[#BF360C] 
+            className={`w-full mt-6 py-3 rounded-lg text-sm text-[16px] border !bg-[#BF360C] text-white 
               hover:bg-[#BF360C] hover:text-white transition-colors duration-300 ${
                 loading ? 'opacity-50 cursor-not-allowed' : ''
               }`}

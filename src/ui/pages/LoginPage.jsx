@@ -24,12 +24,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
-      <div className="absolute top-14 left-151 cursor-pointer" onClick={() => navigate(-1)}>
+    <div className="flex flex-col items-center justify-center min-w-screen min-h-screen bg-white px-6">
+      <div className="absolute top-14 left-6 cursor-pointer" onClick={() => navigate(-1)}>
         <ArrowLeft size={24} className="text-red-700" />
       </div>
 
-      <h1 className="text-[24px] font-semibold text-[#656565] mb-6">Entre agora</h1>
+      <h1 className="text-[20px] font-semibold text-[#656565] mb-6">Entre agora</h1>
 
       <form className="w-full max-w-sm" onSubmit={handleLogin}>
       <label className="block text-[#455A64] text-[14px] text-left font-medium mb-1">Email</label>
@@ -54,7 +54,7 @@ const LoginPage = () => {
 
         <button
           type="submit"
-          class="w-full !bg-[#BF360C] text-white mt-4 rounded-lg shadow-md text-[16px]"
+          class="w-full !bg-[#BF360C] text-white mt-4 h-11 rounded-lg shadow-md text-[16px]"
         >
           ENTRAR
         </button>
