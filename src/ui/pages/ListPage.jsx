@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { auth, db } from "../../../firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import AddItem from "../components/AddItem";
-import EditItem from "../components/EditItem";
 import { ArrowLeft, Share, Trash2, Plus, Check } from "lucide-react";
 
 const ListPage = () => {
@@ -84,15 +83,15 @@ const ListPage = () => {
     setIsEditingTitle(false);
   };
 
-  const itensFiltrados = filtro === "comprados" 
-    ? itens.filter(item => item.comprado) 
+  const itensFiltrados = filtro === "comprados"
+    ? itens.filter(item => item.comprado)
     : itens;
 
   const toggleComprado = async (index) => {
     const novosItens = [...itens];
     novosItens[index].comprado = !novosItens[index].comprado;
     setItens(novosItens);
-  
+
     if (id) {
       const listaRef = doc(db, "listas", id);
       await setDoc(listaRef, { itens: novosItens }, { merge: true });
@@ -143,30 +142,58 @@ const ListPage = () => {
       </header>
 
       <div className="pt-20">
+        <div className="flex justify-center gap-4 mb-4">
+          <button
+            onClick={() => setFiltro("todos")}
+            className={`mt-4 py-2 px-6 text-center rounded-4xl transition-colors duration-300 text-[14px] font-medium ${filtro === "todos"
+              ? "bg-[#2E7D32] text-[#FFFFFF]"
+              : "border border-[#2E7D32] text-[#2E7D32] bg-white"
+              }`}
+          >
+            Todos os itens
+          </button>
+          <button
+            onClick={() => setFiltro("comprados")}
+            className={`mt-4 py-2 px-6 text-center rounded-4xl transition-colors duration-300 text-[14px] font-medium ${filtro === "comprados"
+              ? "bg-[#2E7D32] text-[#FFFFFF]"
+              : "border border-[#2E7D32] text-[#2E7D32] bg-white"
+              }`}
+          >
+            Comprados
+          </button>
+        </div>
+        
         {itensFiltrados.length === 0 ? (
           <p className="text-center text-[#00000045] mt-6">
             {filtro === "comprados" ? "Nenhum item comprado" : "Nenhum item cadastrado"}
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
-            {itensFiltrados.map((item, index) => (
-              <li
-                key={item.uid}
-                className="p-2 border border-[#CFD8DC] rounded-md flex items-center gap-3"
-                onDoubleClick={() => handleEditItem(item.uid)} // 🔹 Edita ao clicar duas vezes
-              >
-                <button
-                  onClick={() => toggleComprado(index)}
-                  className={`w-5 h-5 flex items-center justify-center border-2 rounded-md transition-all duration-200 ${
-                    item.comprado ? "bg-[#66BB6A] border-[#66BB6A]" : "bg-white border-gray-300"
-                  }`}
-                >
-                  {item.comprado && <Check className="w-5 h-5 text-white" />}
-                </button>
+            {itensFiltrados.length === 0 ? (
+              <p className="text-center text-[#00000045] mt-6">
+                {filtro === "comprados" ? "Nenhum item comprado" : "Nenhum item cadastrado"}
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {itensFiltrados.map((item, index) => (
+                  <li
+                    key={item.uid}
+                    className="p-2 border border-[#CFD8DC] rounded-md flex items-center gap-3"
+                    onDoubleClick={() => handleEditItem(item.uid)}
+                  >
+                    <button
+                      onClick={() => toggleComprado(index)}
+                      className={`w-5 h-5 flex items-center justify-center border-2 rounded-md transition-all duration-200 ${item.comprado ? "bg-[#66BB6A] border-[#66BB6A]" : "bg-white border-gray-300"
+                        }`}
+                    >
+                      {item.comprado && <Check className="w-5 h-5 text-white" />}
+                    </button>
 
-                <span className="text-gray-700">{item.nome}</span>
-              </li>
-            ))}
+                    <span className="text-gray-700">{item.nome}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </ul>
         )}
       </div>
@@ -213,7 +240,7 @@ const ListPage = () => {
         <AddItem
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          itemUid={itemToEditUid} // 🔹 Passa o UID para o modal
+          itemUid={itemToEditUid}
           listId={listId}
           setItens={setItens}
         />
