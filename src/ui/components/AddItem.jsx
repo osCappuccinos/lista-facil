@@ -6,12 +6,11 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
   const [categoria, setCategoria] = useState("");
   const [item, setItem] = useState("");
   const [valorUnitario, setValorUnitario] = useState(0);
-  const [quantidade, setQuantidade] = useState(0);
+  const [quantidade, setQuantidade] = useState(1);
   const [categorias, setCategorias] = useState([]);
   const [itensSugeridos, setItensSugeridos] = useState([]);
   const [valorTotal, setValorTotal] = useState(0);
 
-  // Busca todas as categorias do Firestore quando o componente monta
   useEffect(() => {
     const fetchCategorias = async () => {
       const categoriasSnapshot = await getDocs(collection(db, "categorias"));
@@ -21,10 +20,8 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
     fetchCategorias();
   }, []);
 
-  // Atualiza os itens sugeridos quando a categoria é selecionada
   useEffect(() => {
     if (categoria) {
-      // Encontra a categoria selecionada pelo nome
       const catEscolhida = categorias.find(cat => cat.nome === categoria);
       if (catEscolhida && catEscolhida.itens) {
         const sugestoes = catEscolhida.itens.split(',').map(item => item.trim());
@@ -44,20 +41,20 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
 
   const adicionarItem = async () => {
     if (!item.trim() || isNaN(parseFloat(valorUnitario)) || quantidade <= 0) return;
-    
+
     const user = auth.currentUser;
     if (!user) return;
-    
+
     const novoItem = {
       nome: item,
       preco: parseFloat(valorUnitario),
       quantidade,
       comprado: false,
     };
-    
+
     let listaRef;
     let listaExistente = listId;
-    
+
     if (!listId) {
       listaExistente = `${user.uid}-${Date.now()}`;
       setListId(listaExistente);
@@ -71,7 +68,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
     } else {
       listaRef = doc(db, "listas", listId);
       const listaSnap = await getDoc(listaRef);
-      
+
       if (listaSnap.exists()) {
         await updateDoc(listaRef, {
           itens: arrayUnion(novoItem),
@@ -86,7 +83,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
         });
       }
     }
-    
+
     setItens((prevItens) => [...prevItens, novoItem]);
     setItem("");
     setValorUnitario(0);
@@ -97,10 +94,12 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg w-11/12 max-w-md text-black">
+    <div className="fixed inset-0 flex items-center justify-center" style={{ fontFamily: 'Calibri' }}>
+      <div className="absolute inset-0 bg-black opacity-80" onClick={onClose}></div>
+
+      <div className="relative bg-white p-6 rounded-lg w-11/12 max-w-md text-black">
         <div className="h-1 w-12 bg-gray-400 mx-auto rounded-full mb-4"></div>
-        
+
         <label className="block text-sm text-gray-600">Selecione uma categoria</label>
         <select
           className="w-full p-2 border rounded mt-1"
@@ -113,7 +112,7 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
           ))}
         </select>
 
-        <label className="block text-sm text-gray-600 mt-4">Selecione o item</label>
+        <label className="block text-sm text-gray-600 mt-4">Informe o item</label>
         {itensSugeridos.length > 0 ? (
           <select
             className="w-full p-2 border rounded mt-1"
@@ -138,35 +137,37 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens }) => {
         <input
           type="number"
           step="0.01"
-          className="w-full p-2 border rounded mt-1 bg-gray-100 text-gray-600"
+          className="w-full p-2 border rounded mt-1 bg-white text-gray-600"
           value={valorUnitario}
-          onChange={(e) => setValorUnitario(parseFloat(e.target.value) || 0)}
+          onChange={(e) => setValorUnitario(parseFloat(e.target.value))}
           placeholder=""
         />
 
-        <label className="block text-sm text-gray-600 mt-4">Quantidade</label>
-        <div className="flex items-center mt-1">
-          <button className="p-2 bg-red-300 text-gray rounded" onClick={() => setQuantidade(Math.max(0, quantidade - 1))}>-</button>
-          <span className="px-4 text-black">{quantidade}</span>
-          <button className="p-2 bg-red-300 text-gray rounded" onClick={() => setQuantidade(quantidade + 1)}>+</button>
+        <div className="flex items-center justify-between mt-4">
+          <label className="block text-sm text-gray-600">Quantidade</label>
+          <div className="flex items-center mt-1 bg-[#FBE9E7] h-7 w-21 rounded-md">
+            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(Math.max(0, quantidade - 1))}>-</button>
+            <span className="px-4 text-black">{quantidade}</span>
+            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(quantidade + 1)}>+</button>
+          </div>
         </div>
-        
+
         <button
-          className="w-full mt-6 bg-red-600 text-gray p-3 rounded"
+          className="w-full mt-6 bg-[#BF360C] text-gray p-3 rounded-md text-white font-semibold"
           onClick={adicionarItem}
         >
           Adicionar
         </button>
-        
+
         <hr className="my-4" />
-        <div className="text-center text-gray-600 text-sm">Resumo da lista</div>
-        <div className="flex justify-between text-gray-600 text-sm mt-2">
+        <div className="text-center text-[#00000065] text-sm font-semibold text-[14px]">Resumo da lista</div>
+        <div className="flex justify-between text-gray-600 text-sm mt-2 font-medium">
           <p>Quantidade Total</p>
           <p>{quantidade}</p>
         </div>
-        <div className="flex justify-between font-semibold text-gray-800 text-lg">
+        <div className="flex justify-between font-medium text-gray-800 text-lg text-[14px]">
           <p>Valor Total</p>
-          <p>R$ {valorTotal.toFixed(2)}</p>
+          <p className="font-bold text-black text-[16px]">R$ {valorTotal.toFixed(2)}</p>
         </div>
       </div>
     </div>
