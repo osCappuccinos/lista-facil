@@ -4,6 +4,7 @@ import { auth, db } from "../../../firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import AddItem from "../components/AddItem";
 import { ArrowLeft, Share, Trash2, Plus, Check } from "lucide-react";
+import DeleteModal from "../components/DeleteModal";
 
 const ListPage = () => {
   const navigate = useNavigate();
@@ -12,10 +13,13 @@ const ListPage = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [itens, setItens] = useState([]);
   const [filtro, setFiltro] = useState("todos");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   const [listId, setListId] = useState(id);
   const [itemToEditUid, setItemToEditUid] = useState(null);
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchLista = async () => {
@@ -56,12 +60,6 @@ const ListPage = () => {
     setItens(updatedItens);
   };
 
-  const deleteList = async () => {
-    const listaRef = doc(db, "listas", id);
-    await deleteDoc(listaRef);
-    navigate("/home");
-  };
-
   const exportarParaWhatsApp = () => {
     if (itens.length === 0) {
       alert("Nenhum item para exportar.");
@@ -100,7 +98,7 @@ const ListPage = () => {
 
   return (
     <div className="w-screen h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
-      <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center z-10">
+      <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center">
         <button
           className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
           onClick={() => navigate(-1)}
@@ -134,7 +132,7 @@ const ListPage = () => {
           </button>
           <button
             className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
-            onClick={deleteList}
+            onClick={() => setIsDeleteModalOpen(true)}
           >
             <Trash2 color="#CF1322" />
           </button>
@@ -243,6 +241,14 @@ const ListPage = () => {
           itemUid={itemToEditUid}
           listId={listId}
           setItens={setItens}
+        />
+      )}
+
+      {isDeleteModalOpen && (
+        <DeleteModal
+          isVisible={isDeleteModalOpen}
+          onHide={() => setIsDeleteModalOpen(false)}
+          listId={listId}
         />
       )}
     </div>
