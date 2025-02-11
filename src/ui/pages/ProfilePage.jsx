@@ -28,7 +28,6 @@ const ProfilePage = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
@@ -55,7 +54,6 @@ const ProfilePage = () => {
     fetchUserData();
   }, [navigate]);
 
-  // Listen for the beforeinstallprompt event and store it for later use
   useEffect(() => {
     const beforeInstallPromptHandler = (e) => {
       e.preventDefault();
@@ -184,7 +182,6 @@ const ProfilePage = () => {
   return (
     <div className="w-screen h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       <div className="mt-20 w-full max-w-4xl mx-auto">
-        {/* Perfil */}
         <div className="mt-10 flex flex-col items-center justify-center md:flex-row md:space-x-8">
         <div
             onClick={() => fileInputRef.current.click()}
@@ -210,7 +207,6 @@ const ProfilePage = () => {
           <h2 className="text-green-600 mt-2 md:mt-0 text-lg font-semibold">{userName}</h2>
         </div>
 
-        {/* Opções */}
         <div className="w-full max-w-sm md:max-w-md mt-6 mx-auto">
           <ul className="space-y-4">
             <li className="flex items-center text-gray-700">
@@ -240,7 +236,6 @@ const ProfilePage = () => {
           </ul>
         </div>
 
-        {/* Banner */}
         <div className="mt-8 bg-white rounded-lg shadow-md p-4 max-w-sm md:max-w-md w-full border border-red-400 mx-auto">
           <h3 className="text-red-500 font-semibold text-sm">Baixe o Lista Fácil</h3>
           <p className="text-gray-600 text-xs mt-1">
@@ -289,7 +284,6 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {/* Modal de alterar senha */}
         {isChangePasswordModalOpen && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-md w-full max-w-xs md:max-w-sm p-6">
@@ -337,7 +331,6 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {/* Barra inferior */}
         <BottomNavigation />
       </div>
     </div>
