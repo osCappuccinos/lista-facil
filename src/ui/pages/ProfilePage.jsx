@@ -70,7 +70,7 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     }
