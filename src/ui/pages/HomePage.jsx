@@ -73,7 +73,7 @@ const Home = () => {
     <div className="min-h-screen min-w-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center">
         <div className="flex-1">
-          <h1 className="text-[24px] font-semibold text-[#656565]">
+          <h1 className="text-[24px] font-semibold text-[#4CAF50]">
             Olá, {userName}
           </h1>
         </div>

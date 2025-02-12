@@ -1,18 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { getAuth, signInAnonymously } from "firebase/auth";
 
 const WelcomePage = () => {
     const navigate = useNavigate();
-    const auth = getAuth();
-
-    const handleGuestLogin = async () => {
-        try {
-            await signInAnonymously(auth);
-            navigate("/home");
-        } catch (error) {
-            alert("Erro ao entrar como convidado: " + error.message);
-        }
-    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen min-w-screen bg-white">
@@ -27,7 +16,7 @@ const WelcomePage = () => {
         </button>
         <button
             className="btn-guest"
-            onClick={handleGuestLogin}
+            onClick={() => navigate("/anonymous")}
         >
             ENTRAR COMO CONVIDADO
         </button>

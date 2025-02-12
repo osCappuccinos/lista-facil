@@ -6,9 +6,23 @@ import NewListPage from "./ui/pages/ListPage";
 import RegisterPage from "./ui/pages/RegisterPage";
 import WelcomePage from "./ui/pages/WelcomePage";
 import ProfilePage from './ui/pages/ProfilePage';
-import { useEffect } from 'react';
+import GuestPage from './ui/pages/GuestPage';
+import { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import PublicRoute from './utils/route/PublicRoute';
 
 function App() {
+  const auth = getAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
@@ -24,10 +38,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<WelcomePage />} />
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/anonymous" element={<GuestPage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+
         <Route path="/home" element={<HomePage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/list/:id" element={<NewListPage />} />
         <Route path="/new-list" element={<NewListPage />} />
         <Route path='/profile' element={<ProfilePage />} />
