@@ -1,8 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../../../firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { 
+  auth, 
+  db 
+} from '../../../firebase';
+import { 
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword 
+} from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import {
   CircleUser,
   ArrowLeft,
@@ -27,6 +35,7 @@ const ProfilePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [profilePhoto, setProfilePhoto] = useState(null);
   const fileInputRef = useRef(null);
+  const importNotesFileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -178,12 +187,50 @@ const ProfilePage = () => {
     }
   };
 
+  // Handles the file import for notes (e.g., from a CSV file)
+  const handleImportNotesFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+  
+    try {
+      const text = await file.text();
+      // A simple CSV parser example: each row represents a note with title and content separated by commas.
+      const rows = text.split('\n').filter(row => row.trim() !== '');
+      const notes = rows.map((row) => {
+        const [title, content] = row.split(',');
+        return { title: title?.trim(), content: content?.trim() };
+      });
+  
+      // Assuming you have a "notes" collection in Firestore
+      const notesCollectionRef = collection(db, 'notes');
+      for (const note of notes) {
+        // Customize validation logic as needed.
+        if (note.title && note.content) {
+          await addDoc(notesCollectionRef, {
+            ...note,
+            userId: auth.currentUser.uid,
+            createdAt: new Date()
+          });
+        }
+      }
+      alert('Notas importadas com sucesso!');
+    } catch (error) {
+      console.error("Erro ao importar notas:", error);
+      alert('Erro ao importar notas. Verifique o arquivo e tente novamente.');
+    }
+  };
+
+  // Trigger file selection for importing notes
+  const handleImportNotesClick = () => {
+    importNotesFileInputRef.current.click();
+  };
+  
 
   return (
     <div className="w-screen h-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
       <div className="mt-20 w-full max-w-4xl mx-auto">
         <div className="mt-10 flex flex-col items-center justify-center md:flex-row md:space-x-8">
-        <div
+          <div
             onClick={() => fileInputRef.current.click()}
             className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer"
           >
@@ -217,16 +264,27 @@ const ProfilePage = () => {
             </li>
             <li className="flex items-center text-gray-700">
               <Download className="mr-2" size={20} />
-              <button className="!bg-transparent focus:outline-none">
+              <button className="!bg-transparent focus:outline-none" onClick={handleImportNotesClick}>
                 Importar notas
               </button>
+              {/* Hidden input for importing notes */}
+              <input
+                type="file"
+                accept=".txt"
+                ref={importNotesFileInputRef}
+                onChange={handleImportNotesFileChange}
+                className="hidden"
+              />
             </li>
             <li className="flex items-center text-gray-700">
-              <Trash2 className="mr-2" size={20} />
-              <button className="!bg-transparent focus:outline-none">
-                Lixeira
-              </button>
-            </li>
+            <Trash2 className="mr-2" size={20} />
+            <button 
+              className="!bg-transparent focus:outline-none"
+              onClick={() => navigate('/trash')}
+            >
+              Lixeira
+            </button>
+          </li>
             <li className="flex items-center text-red-500">
               <ArrowLeft className="mr-2" size={20} />
               <button className="!bg-transparent focus:outline-none" onClick={handleLogout}>
@@ -299,7 +357,7 @@ const ProfilePage = () => {
                     type="password"
                     placeholder="Nova Senha"
                     className="w-full px-4 py-2 border border-[#CFD8DC] rounded-lg focus:outline-none focus:border-[#BF360C]"
-                    value={newPassword}
+                    value={newPassword} 
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <input

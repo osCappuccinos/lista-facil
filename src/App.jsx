@@ -7,6 +7,7 @@ import RegisterPage from "./ui/pages/RegisterPage";
 import WelcomePage from "./ui/pages/WelcomePage";
 import ProfilePage from './ui/pages/ProfilePage';
 import GuestPage from './ui/pages/GuestPage';
+import TrashPage from './ui/pages/TrashPage';
 import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PublicRoute from './utils/route/PublicRoute';
@@ -49,6 +50,7 @@ function App() {
         <Route path="/list/:id" element={<NewListPage />} />
         <Route path="/new-list" element={<NewListPage />} />
         <Route path='/profile' element={<ProfilePage />} />
+        <Route path="/trash" element={<TrashPage />} />
       </Routes>
     </Router>
   );
