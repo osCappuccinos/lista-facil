@@ -5,7 +5,7 @@ import { db, auth } from "../../../firebase";
 const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid }) => {
   const [categoria, setCategoria] = useState("");
   const [item, setItem] = useState("");
-  const [valorUnitario, setValorUnitario] = useState(0);
+  const [valorUnitario, setValorUnitario] = useState("0");
   const [quantidade, setQuantidade] = useState(1);
   const [categorias, setCategorias] = useState([]);
   const [itensSugeridos, setItensSugeridos] = useState([]);
@@ -64,59 +64,70 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid })
     }
   }, [isOpen, itemUid, listId]);
 
-  const adicionarItem = async () => {
-    if (!item.trim() || isNaN(parseFloat(valorUnitario)) || quantidade <= 0) return;
-
-    const user = auth.currentUser;
-    if (!user) return;
-
-    let listaRef = doc(db, "listas", listId);
-    const listaSnap = await getDoc(listaRef);
-
-    if (editando) {
-      if (listaSnap.exists()) {
-        const itens = listaSnap.data().itens || [];
-        const novoItens = itens.map((it) =>
-          it.uid === itemUid
-            ? { ...it, nome: item, preco: parseFloat(valorUnitario), quantidade }
-            : it
-        );
-
-        await updateDoc(listaRef, { itens: novoItens });
-        setItens(novoItens);
+    const adicionarItem = async () => {
+      if (!item.trim() || isNaN(parseFloat(valorUnitario)) || quantidade <= 0) return;
+    
+      const user = auth.currentUser;
+      if (!user) return;
+    
+      if (!listId) {
+        console.error("Lista ID não encontrada");
+        return;
       }
-    } else {
-      const novoItem = {
-        uid: crypto.randomUUID(),
-        nome: item,
-        preco: parseFloat(valorUnitario),
-        quantidade,
-        comprado: false,
-      };
-
-      if (listaSnap.exists()) {
-        await updateDoc(listaRef, {
-          itens: arrayUnion(novoItem),
-          total: listaSnap.data().total + parseFloat(valorUnitario) * quantidade,
-        });
-      } else {
-        await setDoc(listaRef, {
-          uid: user.uid,
-          titulo: "Nova Lista",
-          itens: [novoItem],
-          total: parseFloat(valorUnitario) * quantidade,
-        });
+    
+      try {
+        let listaRef = doc(db, "listas", listId);
+        const listaSnap = await getDoc(listaRef);
+        const precoNumerico = parseFloat(valorUnitario) || 0;
+    
+        if (editando) {
+          if (listaSnap.exists()) {
+            const itens = listaSnap.data().itens || [];
+            const novoItens = itens.map((it) =>
+              it.uid === itemUid
+                ? { ...it, nome: item, preco: precoNumerico, quantidade }
+                : it
+            );
+    
+            await updateDoc(listaRef, { itens: novoItens });
+            setItens(novoItens);
+          }
+        } else {
+          const novoItem = {
+            uid: crypto.randomUUID(),
+            nome: item,
+            preco: precoNumerico,
+            quantidade,
+            comprado: false,
+          };
+    
+          if (listaSnap.exists()) {
+            const novoTotal = (listaSnap.data().total || 0) + (precoNumerico * quantidade);
+            await updateDoc(listaRef, {
+              itens: arrayUnion(novoItem),
+              total: novoTotal,
+            });
+          } else {
+            await setDoc(listaRef, {
+              uid: user.uid,
+              titulo: "Nova Lista",
+              itens: [novoItem],
+              total: precoNumerico * quantidade,
+            });
+          }
+    
+          setItens((prevItens) => [...prevItens, novoItem]);
+        }
+    
+        setItem("");
+        setValorUnitario("0");
+        setQuantidade(1);
+        setEditando(false);
+        onClose();
+      } catch (error) {
+        console.error("Erro ao adicionar item:", error);
       }
-
-      setItens((prevItens) => [...prevItens, novoItem]);
-    }
-
-    setItem("");
-    setValorUnitario(0);
-    setQuantidade(1);
-    setEditando(false);
-    onClose();
-  };
+    };
 
   if (!isOpen) return null;
 
@@ -162,22 +173,46 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid })
 
         <label className="block text-sm text-gray-600 mt-4">Valor unitário</label>
         <input
-          type="number"
-          step="0.1"
-          className="w-full p-2 border rounded mt-1 bg-white text-gray-600"
-          value={valorUnitario}
-          onChange={(e) => setValorUnitario(parseFloat(e.target.value))}
-          placeholder=""
-        />
+        type="number"
+        min="0"
+        step="0.01"
+        className="w-full p-2 border rounded mt-1 bg-white text-gray-600"
+        value={valorUnitario}
+        onChange={(e) => {
+          const value = parseFloat(e.target.value);
+          if (!isNaN(value) && value >= 0) {
+            setValorUnitario(value.toString());
+          } else if (e.target.value === '') {
+            setValorUnitario('0');
+          }
+        }}
+        onBlur={() => {
+          if (valorUnitario === '' || isNaN(parseFloat(valorUnitario))) {
+            setValorUnitario('0');
+          }
+        }}
+        placeholder="0"
+      />
 
-        <div className="flex items-center justify-between mt-4">
-          <label className="block text-sm text-gray-600">Quantidade</label>
-          <div className="flex items-center mt-1 bg-[#FBE9E7] h-7 w-21 rounded-md">
-            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(Math.max(1, quantidade - 1))}>-</button>
-            <span className="px-4 text-black">{quantidade}</span>
-            <button className="p-2 text-gray rounded" onClick={() => setQuantidade(quantidade + 1)}>+</button>
-          </div>
-        </div>
+<div className="flex items-center justify-between mt-4">
+  <label className="block text-sm text-gray-600">Quantidade</label>
+  <div className="flex items-center mt-1 bg-[#FBE9E7] h-7 w-21 rounded-md">
+    <button 
+      className={`p-2 text-gray rounded ${quantidade <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
+      disabled={quantidade <= 1}
+    >
+      -
+    </button>
+    <span className="px-4 text-black">{quantidade}</span>
+    <button 
+      className="p-2 text-gray rounded"
+      onClick={() => setQuantidade(quantidade + 1)}
+    >
+      +
+    </button>
+  </div>
+</div>
 
         <button
           className="w-full mt-6 bg-[#BF360C] text-gray p-3 rounded-md text-white font-semibold"

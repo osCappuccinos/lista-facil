@@ -198,14 +198,14 @@ const ListPage = () => {
 
       <div className="fixed bottom-4 left-0 right-0 flex justify-center drop-shadow-xl">
         <div className="bg-white rounded-xl p-4 w-11/12 max-w-md">
-          <div className="flex justify-between text-gray-600 text-sm">
-            <p>Quantidade Total</p>
-            <p>{itens.length.toString().padStart(4, "0")}</p>
-          </div>
+        <div className="flex justify-between text-gray-600 text-sm">
+          <p>Quantidade Total</p>
+          <p>{itens.reduce((sum, item) => sum + (item.quantidade || 1), 0)}</p>
+        </div>
           <div className="flex justify-between font-semibold text-gray-800 text-sm">
             <p>Valor Total</p>
-            <p>R$ {itens.reduce((sum, item) => sum + (item.preco || 0), 0).toFixed(2)}</p>
-          </div>
+            <p>R$ {itens.reduce((sum, item) => sum + ((item.preco || 0) * (item.quantidade || 1)), 0).toFixed(2)}</p>
+            </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="mt-4 bg-[#FBE9E7] text-[#BF360C] py-2 px-6 rounded-lg w-full text-[14px cursor-pointer transition-colors duration-300"

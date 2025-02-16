@@ -1,14 +1,42 @@
-import { db } from "../../../firebase";
-import { doc, deleteDoc } from "firebase/firestore";
+import { db, auth } from "../../../firebase";
+import { doc, deleteDoc, getDoc, setDoc } from "firebase/firestore";
 import { Trash2 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const DeleteModal = ({ isVisible, onHide, listId }) => {
     const navigate = useNavigate();
+
     const deleteList = async () => {
-        const listaRef = doc(db, "listas", listId);
-        await deleteDoc(listaRef);
-        navigate("/home");
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                console.error("Usuário não autenticado");
+                return;
+            }
+
+            const listaRef = doc(db, "listas", listId);
+            const listaSnap = await getDoc(listaRef);
+
+            if (listaSnap.exists()) {
+                const listaData = listaSnap.data();
+                const trashRef = doc(db, "trash", listId);
+                
+                // Add userId and deletedAt to the trash data
+                await setDoc(trashRef, {
+                    ...listaData,
+                    userId: user.uid,
+                    deletedAt: new Date().toISOString()
+                });
+                
+                await deleteDoc(listaRef);
+                navigate("/home");
+            } else {
+                console.error("Lista não encontrada");
+            }
+        } catch (error) {
+            console.error("Erro ao mover para lixeira:", error);
+            alert("Erro ao mover item para lixeira. Tente novamente.");
+        }
     };
 
     if (!isVisible) return null;
@@ -42,7 +70,6 @@ const DeleteModal = ({ isVisible, onHide, listId }) => {
             </div>
         </div>
     );
-
 };
 
 export default DeleteModal;
