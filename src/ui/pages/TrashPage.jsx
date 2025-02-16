@@ -39,23 +39,24 @@ const TrashPage = () => {
 
   const handleRestore = async (list) => {
     try {
-      // Restaurar para a coleção de listas
-      await setDoc(doc(db, 'listas', list.id), {
-        titulo: list.titulo,
-        itens: list.itens,
-        userId: list.userId
-      });
-
+      // Restaurar para a coleção de listas sem o campo deletedAt
+      const { deletedAt, ...listData } = list;
+      await setDoc(doc(db, 'listas', list.id), listData);
+  
       // Remover da lixeira
       await deleteDoc(doc(db, 'trash', list.id));
       
       // Atualizar a lista local
       setTrashedLists(prev => prev.filter(l => l.id !== list.id));
+      
+      // Feedback visual (você pode implementar um toast ou alert)
+      alert('Lista restaurada com sucesso!');
     } catch (error) {
       console.error('Erro ao restaurar lista:', error);
+      alert('Erro ao restaurar lista. Tente novamente.');
     }
   };
-
+  
   const handleDelete = async (listId) => {
     if (window.confirm('Deseja excluir permanentemente esta lista?')) {
       try {

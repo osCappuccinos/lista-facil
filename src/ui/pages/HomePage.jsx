@@ -3,7 +3,7 @@ import { auth, db } from "../../../firebase";
 import { collection, query, where, getDocs, doc, deleteDoc, updateDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import ListaCard from "../components/ListCard";
-import { List, PencilLine, CircleUser } from "lucide-react";
+import { List, PencilLine, CircleUser, Share } from "lucide-react";
 import BottomNavigation from "../components/BottomNavigation";
 
 const Home = () => {
@@ -82,7 +82,7 @@ const Home = () => {
             className="w-10 h-10 flex items-center justify-center bg-white text-[#656565] rounded-lg focus:outline-none"
             onClick={exportarParaWhatsApp}
           >
-            📤
+            <Share size={24} />
           </button>
         </div>
       </header>
