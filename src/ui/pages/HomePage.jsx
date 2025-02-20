@@ -9,6 +9,7 @@ import BottomNavigation from "../components/BottomNavigation";
 const Home = () => {
   const [listas, setListas] = useState([]);
   const [userName, setUserName] = useState('');
+  const [viewMode, setViewMode] = useState('list');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,26 +88,42 @@ const Home = () => {
         </div>
       </header>
 
-      <div className="pt-20">
-        <h2 className="text-lg font-medium text-[#656565] mb-4">Todas as listas</h2>
+      <div className="pt-20 flex justify-between items-center">
+        <h2 className="text-lg font-medium text-[#656565]">Todas as listas</h2>
 
-        <div className="grid grid-cols-2 gap-4 mt-5">
-          {listas.length === 0 ? (
-            <p className="text-center text-[#656565] mt-6">Nenhuma lista encontrada</p>
-          ) : (
-            listas.map((lista) => (
-              <ListaCard 
-                key={lista.id} 
-                id={lista.id} 
-                titulo={lista.titulo} 
-                itens={lista.itens || []} 
-                total={parseFloat(lista.total) || 0} 
-                onEdit={editList}
-                onDelete={deleteList}
-              />
-            ))
-          )}
+        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <button 
+            className={`px-4 py-2 text-sm ${viewMode === 'list' ? 'bg-[#FBE9E7] text-[#BF360C] font-bold' : 'text-[#212121]'}`}
+            onClick={() => setViewMode('list')}
+          >
+            LISTA
+          </button>
+          <button 
+            className={`px-4 py-2 text-sm ${viewMode === 'grid' ? 'bg-[#FBE9E7] text-[#BF360C] font-bold' : 'text-[#212121]'}`}
+            onClick={() => setViewMode('grid')}
+          >
+            GRADE
+          </button>
         </div>
+
+      </div>
+
+      <div className={`mt-5 grid gap-4 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        {listas.length === 0 ? (
+          <p className="text-center text-[#656565] mt-6">Nenhuma lista encontrada</p>
+        ) : (
+          listas.map((lista) => (
+            <ListaCard 
+              key={lista.id} 
+              id={lista.id} 
+              titulo={lista.titulo} 
+              itens={lista.itens || []} 
+              total={parseFloat(lista.total) || 0} 
+              onEdit={editList}
+              onDelete={deleteList}
+            />
+          ))
+        )}
       </div>
 
       <BottomNavigation />
