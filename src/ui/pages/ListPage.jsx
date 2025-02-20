@@ -210,7 +210,7 @@ const ListPage = () => {
             onClick={() => setIsAddModalOpen(true)}
             className="mt-4 bg-[#FBE9E7] text-[#BF360C] py-2 px-6 rounded-lg w-full text-[14px cursor-pointer transition-colors duration-300"
           >
-            <div class="flex justify-center items-center gap-1 font-semibold" >
+            <div className="flex justify-center items-center gap-1 font-semibold" >
               <Plus />
               Adicionar item
             </div>

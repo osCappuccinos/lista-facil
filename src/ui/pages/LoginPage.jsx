@@ -37,7 +37,7 @@ const LoginPage = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          class="w-full border border-[#CFD8DC]  rounded-md p-3 mb-6 focus:outline-none focus:ring-2 focus:ring-[#BF360C] text-black"
+          className="w-full border border-[#CFD8DC]  rounded-md p-3 mb-6 focus:outline-none focus:ring-2 focus:ring-[#BF360C] text-black"
           required
         />
 
@@ -54,15 +54,15 @@ const LoginPage = () => {
 
         <button
           type="submit"
-          class="w-full !bg-[#BF360C] text-white mt-4 h-11 rounded-lg shadow-md text-[16px]"
+          className="w-full !bg-[#BF360C] text-white mt-4 h-11 rounded-lg shadow-md text-[16px]"
         >
           ENTRAR
         </button>
       </form>
 
-      <p class="mt-6 text-[#888888] text-[12px]">
+      <p className="mt-6 text-[#888888] text-[12px]">
         NÃO POSSUI UMA CONTA?{" "}
-        <Link to="/register" class="!text-[#BF360C] font-bold">
+        <Link to="/register" className="!text-[#BF360C] font-bold">
           CRIE UMA AQUI
         </Link>
       </p>

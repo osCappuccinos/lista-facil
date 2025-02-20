@@ -11,6 +11,7 @@ import TrashPage from './ui/pages/TrashPage';
 import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PublicRoute from './utils/route/PublicRoute';
+import PrivateRoute from './utils/route/PrivateRoute';
 
 function App() {
   const auth = getAuth();
@@ -46,11 +47,13 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/list/:id" element={<NewListPage />} />
-        <Route path="/new-list" element={<NewListPage />} />
-        <Route path='/profile' element={<ProfilePage />} />
-        <Route path="/trash" element={<TrashPage />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/list/:id" element={<NewListPage />} />
+          <Route path="/new-list" element={<NewListPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
+          <Route path="/trash" element={<TrashPage />} />
+        </Route>
       </Routes>
     </Router>
   );

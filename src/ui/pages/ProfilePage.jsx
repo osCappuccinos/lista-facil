@@ -187,24 +187,20 @@ const ProfilePage = () => {
     }
   };
 
-  // Handles the file import for notes (e.g., from a CSV file)
   const handleImportNotesFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
   
     try {
       const text = await file.text();
-      // A simple CSV parser example: each row represents a note with title and content separated by commas.
       const rows = text.split('\n').filter(row => row.trim() !== '');
       const notes = rows.map((row) => {
         const [title, content] = row.split(',');
         return { title: title?.trim(), content: content?.trim() };
       });
   
-      // Assuming you have a "notes" collection in Firestore
       const notesCollectionRef = collection(db, 'notes');
       for (const note of notes) {
-        // Customize validation logic as needed.
         if (note.title && note.content) {
           await addDoc(notesCollectionRef, {
             ...note,
@@ -220,7 +216,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Trigger file selection for importing notes
   const handleImportNotesClick = () => {
     importNotesFileInputRef.current.click();
   };

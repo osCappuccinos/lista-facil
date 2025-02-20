@@ -39,16 +39,18 @@ const GuestPage = () => {
         }
     };
 
-
     return (
-        <div className="min-h-screen min-w-screen bg-white px-6" style={{ fontFamily: 'Calibri' }}>
+        <div 
+            className="min-h-screen min-w-screen bg-white flex flex-col justify-center items-center px-6"
+            style={{ fontFamily: 'Calibri' }}
+        >
             <header className="fixed top-5 left-0 right-0 bg-white px-6 py-2 flex justify-between items-center">
                 <div className="absolute top-5 left-6 cursor-pointer" onClick={() => navigate(-1)}>
                     <ArrowLeft size={24} className="text-red-700" />
                 </div>
             </header>
-
-            <div className='pt-20 flex flex-col items-center'>
+    
+            <div className="flex flex-col items-center w-full max-w-md">
                 <h1 className="text-[20px] font-semibold text-[#656565] mb-6">Acesse como convidado</h1>
 
                 <form onSubmit={(e) => handleGuestLogin(e)} className="w-full max-w-md space-y-4">
