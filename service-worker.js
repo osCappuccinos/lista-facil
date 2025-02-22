@@ -1,9 +1,10 @@
-const CACHE_NAME = 'lista-facil-cache-v1';
+const CACHE_NAME = 'lista-facil-cache-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  '/lista-facil/',
+  '/lista-facil/index.html',
+  '/lista-facil/manifest.json',
 ];
+
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -63,3 +64,4 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
