@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, getDocs } from "firebase/firestore";
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  arrayUnion, 
+  collection, 
+  getDocs 
+} from "firebase/firestore";
 import { db, auth } from "../../../firebase";
 
 const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid }) => {
@@ -64,70 +72,113 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid })
     }
   }, [isOpen, itemUid, listId]);
 
-    const adicionarItem = async () => {
-      if (!item.trim() || isNaN(parseFloat(valorUnitario)) || quantidade <= 0) return;
-    
-      const user = auth.currentUser;
-      if (!user) return;
-    
-      if (!listId) {
-        console.error("Lista ID não encontrada");
-        return;
-      }
-    
-      try {
-        let listaRef = doc(db, "listas", listId);
-        const listaSnap = await getDoc(listaRef);
-        const precoNumerico = parseFloat(valorUnitario) || 0;
-    
-        if (editando) {
-          if (listaSnap.exists()) {
-            const itens = listaSnap.data().itens || [];
-            const novoItens = itens.map((it) =>
-              it.uid === itemUid
-                ? { ...it, nome: item, preco: precoNumerico, quantidade }
-                : it
-            );
-    
-            await updateDoc(listaRef, { itens: novoItens });
-            setItens(novoItens);
-          }
+  const adicionarItem = async () => {
+    if (!item.trim() || isNaN(parseFloat(valorUnitario))) return;
+  
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    try {
+      // If quantity is 0 and we're editing, remove the item
+      if (quantidade === 0 && editando) {
+        if (listId.startsWith('temp-')) {
+          // Remove from temporary list
+          setItens(prevItens => prevItens.filter(item => item.uid !== itemUid));
         } else {
-          const novoItem = {
-            uid: crypto.randomUUID(),
-            nome: item,
-            preco: precoNumerico,
-            quantidade,
-            comprado: false,
-          };
-    
+          // Remove from saved list
+          const listaRef = doc(db, "listas", listId);
+          const listaSnap = await getDoc(listaRef);
+  
           if (listaSnap.exists()) {
-            const novoTotal = (listaSnap.data().total || 0) + (precoNumerico * quantidade);
+            const listaAtual = listaSnap.data();
+            const novosItens = listaAtual.itens.filter(item => item.uid !== itemUid);
+  
             await updateDoc(listaRef, {
-              itens: arrayUnion(novoItem),
-              total: novoTotal,
+              itens: novosItens,
+              total: novosItens.reduce((sum, item) => 
+                sum + (item.preco * item.quantidade), 0
+              ),
             });
-          } else {
-            await setDoc(listaRef, {
-              uid: user.uid,
-              titulo: "Nova Lista",
-              itens: [novoItem],
-              total: precoNumerico * quantidade,
-            });
+  
+            setItens(novosItens);
           }
-    
-          setItens((prevItens) => [...prevItens, novoItem]);
         }
-    
+  
+        // Reset form and close
         setItem("");
+        setCategoria("");
         setValorUnitario("0");
         setQuantidade(1);
         setEditando(false);
         onClose();
-      } catch (error) {
-        console.error("Erro ao adicionar item:", error);
+        return;
       }
-    };
+  
+      // Add or update item
+      const novoItem = {
+        uid: editando ? itemUid : crypto.randomUUID(),
+        nome: item,
+        categoria: categoria,
+        preco: parseFloat(valorUnitario) || 0,
+        quantidade,
+        comprado: false,
+      };
+  
+      if (listId.startsWith('temp-')) {
+        // For temporary lists - update state directly
+        setItens(prevItens => {
+          if (editando) {
+            // Replace existing item
+            return prevItens.map(item => 
+              item.uid === itemUid ? novoItem : item
+            );
+          }
+          // Add new item
+          return [...prevItens, novoItem];
+        });
+      } else {
+        // For saved lists - update Firestore
+        const listaRef = doc(db, "listas", listId);
+        const listaSnap = await getDoc(listaRef);
+  
+        if (listaSnap.exists()) {
+          const listaAtual = listaSnap.data();
+          let novosItens;
+  
+          if (editando) {
+            // Replace existing item in array
+            novosItens = listaAtual.itens.map(item =>
+              item.uid === itemUid ? novoItem : item
+            );
+          } else {
+            // Add new item to array
+            novosItens = [...(listaAtual.itens || []), novoItem];
+          }
+  
+          // Update document with new array and total
+          await updateDoc(listaRef, {
+            itens: novosItens,
+            total: novosItens.reduce((sum, item) => 
+              sum + (item.preco * item.quantidade), 0
+            ),
+          });
+  
+          // Update local state to reflect changes
+          setItens(novosItens);
+        }
+      }
+  
+      // Reset form
+      setItem("");
+      setCategoria("");
+      setValorUnitario("0");
+      setQuantidade(1);
+      setEditando(false);
+      onClose();
+    } catch (error) {
+      console.error("Erro ao adicionar/editar item:", error);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -198,20 +249,26 @@ const AddItemModal = ({ isOpen, onClose, listId, setListId, setItens, itemUid })
   <label className="block text-sm text-gray-600">Quantidade</label>
   <div className="flex items-center mt-1 bg-[#FBE9E7] h-7 w-21 rounded-md">
     <button 
-      className={`p-2 text-gray rounded ${quantidade <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
-      disabled={quantidade <= 1}
+      className={`p-2 text-gray rounded ${!editando && quantidade <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={() => setQuantidade(prev => Math.max(editando ? 0 : 1, prev - 1))}
+      disabled={!editando && quantidade <= 1}
+      title={editando ? "Definir como 0 para remover o item" : ""}
     >
       -
     </button>
     <span className="px-4 text-black">{quantidade}</span>
     <button 
       className="p-2 text-gray rounded"
-      onClick={() => setQuantidade(quantidade + 1)}
+      onClick={() => setQuantidade(prev => prev + 1)}
     >
       +
     </button>
   </div>
+  {editando && quantidade === 0 && (
+    <span className="text-xs text-red-600 absolute -bottom-5 right-0">
+      Salvar com 0 irá remover o item
+    </span>
+  )}
 </div>
 
         <button

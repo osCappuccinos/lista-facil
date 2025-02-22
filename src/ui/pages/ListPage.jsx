@@ -13,6 +13,7 @@ const ListPage = () => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [itens, setItens] = useState([]);
   const [filtro, setFiltro] = useState("todos");
+  const [tempListId, setTempListId] = useState(id || `temp-${Date.now()}`); 
 
   const [listId, setListId] = useState(id);
   const [itemToEditUid, setItemToEditUid] = useState(null);
@@ -38,13 +39,17 @@ const ListPage = () => {
   const salvarLista = async () => {
     const user = auth.currentUser;
     if (!user) return;
-    const listaRef = doc(db, "listas", id || `${user.uid}-${Date.now()}`);
+    
+    const finalListId = id || `${user.uid}-${Date.now()}`;
+    const listaRef = doc(db, "listas", finalListId);
+    
     await setDoc(listaRef, {
       uid: user.uid,
       titulo,
       itens,
-      total: itens.reduce((sum, item) => sum + (item.preco || 0), 0),
+      total: itens.reduce((sum, item) => sum + ((item.preco || 0) * (item.quantidade || 1)), 0),
     });
+    
     navigate("/home");
   };
 
@@ -65,10 +70,51 @@ const ListPage = () => {
       alert("Nenhum item para exportar.");
       return;
     }
-    const listaTexto = itens.map(item =>
-      `Nome: ${item.nome}, Categoria: ${item.categoria}, Preço: ${item.preco}, Quantidade: ${item.quantidade}`
-    ).join('\n');
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(titulo + '\n\n' + listaTexto)}`;
+  
+    // Group items by category
+    const itensPorCategoria = itens.reduce((acc, item) => {
+      // Get the category name, default to "Outros" if not present
+      const categoria = item.categoria || 'Outros';
+      
+      // Initialize the category array if it doesn't exist
+      if (!acc[categoria]) {
+        acc[categoria] = [];
+      }
+      
+      // Add the item to its category
+      acc[categoria].push(item);
+      return acc;
+    }, {});
+  
+    // Format the text with categories
+    const listaTexto = Object.entries(itensPorCategoria)
+      // Sort categories
+      .sort(([catA], [catB]) => {
+        if (catA === 'Outros') return 1;
+        if (catB === 'Outros') return -1;
+        return catA.localeCompare(catB);
+      })
+      // Format each category and its items
+      .map(([categoria, itensCategoria]) => {
+        const itensTexto = itensCategoria
+          .map(item => 
+            `• ${item.nome}: R$ ${(item.preco || 0).toFixed(2)} x ${item.quantidade || 1}`
+          )
+          .join('\n');
+        return `${categoria}:\n${itensTexto}`;
+      })
+      .join('\n\n');
+  
+    // Calculate total
+    const total = itens.reduce((sum, item) => 
+      sum + ((item.preco || 0) * (item.quantidade || 1)), 0
+    );
+  
+    // Create the final message
+    const mensagem = `${titulo}\n\n${listaTexto}\n\nTotal: R$ ${total.toFixed(2)}`;
+    
+    // Open WhatsApp with the formatted message
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`;
     window.open(url, '_blank');
   };
 
@@ -225,21 +271,21 @@ const ListPage = () => {
       </div>
 
       {isAddModalOpen && (
-        <AddItem
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          listId={listId}
-          setListId={setListId}
-          setItens={setItens}
-        />
-      )}
+  <AddItem
+    isOpen={isAddModalOpen}
+    onClose={() => setIsAddModalOpen(false)}
+    listId={id || tempListId}
+    setListId={setListId}
+    setItens={setItens}
+  />
+)}
 
       {isEditModalOpen && (
         <AddItem
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           itemUid={itemToEditUid}
-          listId={listId}
+          listId={id || tempListId}
           setItens={setItens}
         />
       )}
