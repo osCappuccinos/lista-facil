@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.svg";
 
 const WelcomePage = () => {
     const navigate = useNavigate();
@@ -8,8 +9,8 @@ const WelcomePage = () => {
             className="flex flex-col items-center min-h-screen bg-white px-6 pt-10" 
             style={{ fontFamily: 'Calibri' }}
         >
-            <div className="w-40 h-40 border border-gray-400 flex items-center justify-center my-20">
-                <span className="text-gray-400 text-4xl">🖼️</span>
+            <div className="w-40 h-40 flex items-center justify-center my-20">
+                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
             </div>
     
             <div className="flex flex-col w-full max-w-xs items-center">
